@@ -1,5 +1,5 @@
 #select image base
-FROM node:16-alpine3.11
+FROM node:15-alpine
 
 ENV USER=myuser
 ENV GROUP=mygroup
@@ -9,7 +9,7 @@ ENV WORKDIR=/home/$USER/app
 ENV AUTHOR_EMAIL="femtonet.email@gmail.com"
 ENV AUTHOR_NAME="Mostapha Bourarach"
 ENV PORT=3000
-ENV VOLUME=/myvol/logs
+ENV VOLUME=/home/myuser/app/logs
 
 LABEL author.name=$AUTHOR_NAME \
       author.email=$AUTHOR
@@ -18,9 +18,11 @@ LABEL author.name=$AUTHOR_NAME \
 RUN addgroup -g $UID -S $GROUP
 RUN adduser -u $GID -S $USER -G $GROUP
 
-# update npm to fix error
+# installing dependencies
+RUN apk update
+RUN apk upgrade
 RUN npm install -g npm@7.16.0
-
+RUN npm i -g forever
 # set user
 USER $USER
 
@@ -44,6 +46,6 @@ COPY . .
 EXPOSE $PORT
 
 # main entry app entrypoint
-CMD ["npm", "start"]
+ENTRYPOINT [ "npm", "start"]
 
 # command run the service in production with monitoring

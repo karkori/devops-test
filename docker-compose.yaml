@@ -1,0 +1,12 @@
+version: '3'
+services:
+  app:
+    image: devops-test:latest
+    ports:
+      - 3000:3000
+    working_dir: /home/myuser/app
+    volumes:
+      - applogs:/home/myuser/app/logs
+volumes:
+  applogs:
+    driver: local
