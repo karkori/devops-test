@@ -1,43 +1,54 @@
 #select image base
-FROM node:15-alpine
+FROM ubuntu:latest
 
-ENV USER=myuser
-ENV GROUP=mygroup
-ENV UID=1001
-ENV GID=1001
-ENV WORKDIR=/home/$USER/app
-ENV AUTHOR_EMAIL="femtonet.email@gmail.com"
-ENV AUTHOR_NAME="Mostapha Bourarach"
+ENV USER=mostapha
+ENV PASSWORD=password
+ENV WORKDIR=/app
 ENV PORT=3000
-ENV VOLUME=/home/myuser/app/logs
+ENV VOLUME=/webapp/logs
 
-LABEL author.name=$AUTHOR_NAME \
-      author.email=$AUTHOR
+#changing password for root to root
+#console logs for checking the current user
+RUN echo "current user: $(whoami)"
+#Set to root user
+#this is redundant but it prevents some problems (the re-build of existing image)
+USER root 
+RUN echo 'root:root' | chpasswd
+RUN echo "User ID: $(whoami)" 
 
-# user: create a group and add a new user to this group
-RUN addgroup -g $UID -S $GROUP
-RUN adduser -u $GID -S $USER -G $GROUP
-
-# installing dependencies
-RUN apk update
-RUN apk upgrade
-RUN npm install -g npm@7.16.0
+# installing dependencies and setting configs
+RUN apt-get update
+RUN apt-get -y install sudo
+RUN apt-get -y install curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get -y install nodejs
+RUN apt-get -y install openssh-server
 RUN npm i -g forever
+RUN mkdir -p ~/.ssh
+RUN chmod 700 ~/.ssh
+RUN touch ~/.ssh/authorized_keys
+RUN chmod 600 ~/.ssh/authorized_keys
+RUN /etc/init.d/ssh start
+
+#new user
+#Add new user *only if it doesn't exist*
+COPY ./addUser.sh /
+RUN chmod +x /addUser.sh
+RUN echo $(/addUser.sh $USER $PASSWORD)
+
 # set user
 USER $USER
-
 # setting work dir
-RUN mkdir -p $WORKDIR
 WORKDIR $WORKDIR
-RUN mkdir /home/$USER/app/logs && touch access.log
 
+RUN chown $USER $WORKDIR
 
 COPY package.json .
 
 #volume
 VOLUME ["$VOLUME"]
 
-RUN npm install
+RUN echo $PASSWORD | sudo -S npm install
 
 # copying project files into container
 COPY . .
@@ -46,6 +57,7 @@ COPY . .
 EXPOSE $PORT
 
 # main entry app entrypoint
-ENTRYPOINT [ "npm", "start"]
+ENTRYPOINT [ "sudo", "npm" ]
 
-# command run the service in production with monitoring
+# command run the service
+CMD [ "start" ]
