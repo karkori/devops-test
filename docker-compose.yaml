@@ -3,7 +3,8 @@ services:
   app:
     image: devops-test:latest
     ports:
-      - 3000:3000
+      - "3000:3000"
+      - "22:22"
     working_dir: /home/myuser/app
     volumes:
       - applogs:/home/myuser/app/logs
