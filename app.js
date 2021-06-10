@@ -15,7 +15,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // Create write stream to save log
-var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flag: 'a' });
+var accessLogStream = fs.createWriteStream('./logs/access.log', { flag: 'as+' });
 
 app.use(logger('combined', {
   stream: accessLogStream
