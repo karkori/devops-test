@@ -6,6 +6,7 @@ ENV PASSWORD=password
 ENV WORKDIR=/app
 ENV PORT=3000
 ENV VOLUME=/webapp/logs
+ENV ROOTPASSWORD=root
 
 #changing password for root to root
 #console logs for checking the current user
@@ -13,7 +14,7 @@ RUN echo "current user: $(whoami)"
 #Set to root user
 #this is redundant but it prevents some problems (the re-build of existing image)
 USER root 
-RUN echo 'root:root' | chpasswd
+RUN echo "$ROOTPASSWORD\n$ROOTPASSWORD\n" | passwd "root"
 RUN echo "User ID: $(whoami)" 
 
 # installing dependencies and setting configs
@@ -29,6 +30,7 @@ RUN chmod 700 ~/.ssh
 RUN touch ~/.ssh/authorized_keys
 RUN chmod 600 ~/.ssh/authorized_keys
 RUN /etc/init.d/ssh start
+RUN apt-get -y install net-tools
 
 #new user
 #Add new user *only if it doesn't exist*
@@ -41,7 +43,7 @@ USER $USER
 # setting work dir
 WORKDIR $WORKDIR
 
-RUN chown $USER $WORKDIR
+RUN (echo "$ROOTPASSWORD\n" | sudo -S su) && chown $USER $WORKDIR && exit
 
 COPY package.json .
 
