@@ -36,14 +36,16 @@ RUN apt-get -y install net-tools
 #Add new user *only if it doesn't exist*
 COPY ./addUser.sh /
 RUN chmod +x /addUser.sh
-RUN echo $(/addUser.sh $USER $PASSWORD)
+RUN echo $(/addUser.sh $USER $PASSWORD)&& \
+    mkdir $WORKDIR && \
+    chown $USER $WORKDIR
 
 # set user
 USER $USER
 # setting work dir
 WORKDIR $WORKDIR
 
-RUN (echo "$ROOTPASSWORD\n" | sudo -S su) && chown $USER $WORKDIR && exit
+#RUN (echo "$ROOTPASSWORD\n" | sudo -S su) && chown $USER $WORKDIR && exit
 
 COPY package.json .
 
