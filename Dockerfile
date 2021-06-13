@@ -19,18 +19,16 @@ RUN echo "User ID: $(whoami)"
 
 # installing dependencies and setting configs
 RUN apt-get update
-RUN apt-get -y install sudo
-RUN apt-get -y install curl gnupg
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get -y install nodejs
-RUN apt-get -y install openssh-server
-RUN npm i -g forever
-RUN mkdir -p ~/.ssh
-RUN chmod 700 ~/.ssh
-RUN touch ~/.ssh/authorized_keys
-RUN chmod 600 ~/.ssh/authorized_keys
-RUN /etc/init.d/ssh start
-RUN apt-get -y install net-tools
+RUN apt-get -y install \
+        sudo curl gnupg openssh-server net-tools \
+    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && apt-get -y install nodejs \
+    && npm i -g forever \
+    && mkdir -p ~/.ssh \
+    && chmod 700 ~/.ssh \
+    && touch ~/.ssh/authorized_keys \
+    && chmod 600 ~/.ssh/authorized_keys \
+    && /etc/init.d/ssh start
 
 #new user
 #Add new user *only if it doesn't exist*
