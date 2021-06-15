@@ -3,7 +3,7 @@ This is a small node.js webapp using Express, and it is dockerized with Docker. 
 
 ## Running the app
 ```
-npm start
+npm install && npm start
 ```
 The server is listening on localhost port 3000:
 ```
